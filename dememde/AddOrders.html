@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявки</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            white-space: nowrap;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+
+        input, select {
+            padding: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="form-container">
+        <h2>Добавить новую заявку</h2>
+        <form id="addOrderForm">
+            <label for="device">Оборудование:</label>
+            <input type="text" id="device" name="device" required>
+
+            <label for="problemType">Тип проблемы:</label>
+            <input type="text" id="problemType" name="problemType" required>
+
+            <label for="problemDescription">Описание проблемы:</label>
+            <input type="text" id="problemDescription" name="problemDescription" required>
+
+            <label for="client">Клиент:</label>
+            <input type="text" id="client" name="client" required>
+
+            <label for="status">Статус:</label>
+            <select id="status" name="status">
+                <option value="новая заявка">Новая заявка</option>
+                <option value="в процессе">В процессе</option>
+                <option value="выполнено">Выполнено</option>
+            </select>
+
+            <button type="submit">Добавить заявку</button>
+        </form>
+    </div>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Дата начала</th>
+                <th>Дата завершения</th>
+                <th>Оборудование</th>
+                <th>Тип проблемы</th>
+                <th>Описание проблемы</th>
+                <th>Клиент</th>
+                <th>Статус</th>
+                <th>Мастер</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+        </tbody>
+    </table>
+
+    <script>
+        const tableBody = document.getElementById("ordersTableBody");
+        const addOrderForm = document.getElementById("addOrderForm");
+
+        async function GetOrders() {
+            let response = await fetch("http://localhost:5118/", { method: "GET" });
+            let orders = await response.json();
+            tableBody.innerHTML = "";
+
+            orders.forEach(ord => {
+                let row = document.createElement("tr");
+
+                row.append(CreateTd(ord.number));
+                row.append(CreateTd(new Date(ord.createDate).toLocaleDateString()));
+                row.append(CreateTd(ord.completeDate ? new Date(ord.completeDate).toLocaleDateString() : "—"));
+                row.append(CreateTd(ord.device));
+                row.append(CreateTd(ord.problemType));
+                row.append(CreateTd(ord.problemDescription));
+                row.append(CreateTd(ord.client));
+                row.append(CreateTd(ord.status));
+                row.append(CreateTd(ord.master || "—"));
+
+                tableBody.append(row);
+            });
+        }
+
+
+        function CreateTd(data) {
+            let td = document.createElement("td");
+            td.textContent = data ? data.toString() : "—";
+            return td;
+        }
+
+
+        async function AddOrder(event) {
+            event.preventDefault();
+            let formData = new FormData(addOrderForm);
+
+            let newOrder = {
+                year: new Date().getFullYear(),
+                month: new Date().getMonth() + 1,
+                day: new Date().getDate(),
+                device: formData.get("device"),
+                problemType: formData.get("problemType"),
+                problemDescription: formData.get("problemDescription"),
+                client: formData.get("client"),
+                status: formData.get("status"),
+                master: "",
+                comment: ""
+            };
+
+            let response = await fetch("http://localhost:5118/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newOrder)
+            });
+
+            if (response.ok) {
+                GetOrders();
+                addOrderForm.reset();
+            } else {
+                alert("Ошибка при добавлении заявки");
+            }
+        }
+
+        GetOrders();
+        addOrderForm.addEventListener("submit", AddOrder);
+    </script>
+</body>
+</html>

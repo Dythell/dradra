@@ -1,0 +1,54 @@
+POST http://localhost:5118/
+Content-Type: application/json
+
+{
+"year"                   :   "2024" ,
+"month"                 :   "2" ,
+"day"                  :   "10" ,
+"device"                :   "телевизор" ,
+"problemType"           :   "не_работает" ,
+"problemDescription"    :   "п" ,
+"client"                :   "д" ,
+"status"                :   "новая заявка" ,
+"master"                :   "з" ,
+"comment"               :   ""
+}    
+
+
+###
+PUT http://localhost:5118/1
+Content-Type: application/json
+
+{
+  "problemDescription"    :   "ничего" ,
+  "status"                :   "выполнено" ,
+  "master"                :   "сашко" ,
+  "comment"               :   "вая"
+}
+
+
+###
+GET http://localhost:5118/2
+
+###
+GET http://localhost:5118/search?client=я
+
+###
+PUT http://localhost:5118/1/
+Content-Type: application/json
+
+{
+  "comment": "тута сложна"
+}
+
+###
+GET http://localhost:5118/stat/problem-type?type=не_работаеТ
+
+
+###
+PUT http://localhost:5118/1
+Content-Type: application/json
+
+{
+  "completeDate": "2023-09-25T15:30:00"
+}
